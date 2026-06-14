@@ -41,7 +41,7 @@ export default function App() {
       };
       
       fetchAircraft();
-      const interval = setInterval(fetchAircraft, 1000);
+      const interval = setInterval(fetchAircraft, 50);
       
       return() => clearInterval(interval);
     }, []);

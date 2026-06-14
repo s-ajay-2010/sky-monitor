@@ -1,51 +1,65 @@
+import requests
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import os
 from dotenv import load_dotenv
+import cache_db
+import fr24_scraper
+from geopy.distance import geodesic
 
 load_dotenv()
-FA =os.getenv("FRONTEND_API").strip()
+CENTER_LAT = float(os.getenv("CENTER_LAT"))
+CENTER_LON = float(os.getenv("CENTER_LON"))
+RADIUS_KM = float(os.getenv("RADIUS_KM"))
 
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[FA],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-aircraft = [
-    {
-        "id": 1,
-        "x": 120,
-        "y": 80,
-        "callsign": "ABCD",
-        "type": "A380",
-        "altitude": "36,000ft",
-        "speed": "450kts",
-        "heading": "132°",
-        "vx": 0.15,
-        "vy": 0.50,
-        "color": "#00ff66",
-    },
+cs_map = {
+    "IGO": "6E",
+    "AIC": "AI",
+    "IX": "AXB",
+    "QP": "AKJ",
+    "SG": "SEJ",
+    "9I": "LLR",
+    "S5": "SDG",
+    "EK": "UAE",
+    "EY": "ETD",
+    "QR": "QTR",
+    "G9": "ABY",
+    "WY": "OMA",
+    "OV": "OMS",
+    "J9": "JZR",
+    "KU": "KAC",
+    "SQ": "SIA",
+    "TR": "TGW",
+    "MH": "MAS",
+    "AK": "AXM",
+    "TG": "THA",
+    "FD": "AIQ",
+    "CX": "CPA",
+    "UL": "ALK",
+    "8D": "EXV",
+    "BG": "BBC",
+    "LH": "DLH",
+    "BA": "BAW",
+    "ET": "ETH",
+    "VTI": "UK",
+}
 
-    {
-      "id": 2,
-      "x": -180,
-      "y": -120,
-      "callsign": "EFGH",
-      "type": "B777",
-      "altitude": "45,000ft",
-      "speed": "400kts",
-      "heading": "250°",
-      "vx": 0.8,
-      "vy": 0.18,
-      "color": "#cc0404",
-    }
-]
-
+def fr24CallsignConverter(cs):
+    for prefix, replacement in cs_map.items():
+        if cs.startswith(prefix):
+            return cs.replace(prefix, replacement, 1)
+    return cs
+    
 
 @app.get("/")
 def root():
@@ -57,14 +71,61 @@ def root():
 @app.get("/aircraft")
 def get_aircraft():
 
-    for ac in aircraft:
-        ac["x"] += ac["vx"]
-        ac["y"] += ac["vy"]
+    url="https://opensky-network.org/api/states/all"
+    response = requests.get(url, timeout=10)
+    if response.status_code != 200:
+        return{
+            "error": "OpenSky API unavailable"
+        }
+    
+    try:
+        data = response.json()
 
-        if ac["x"] < -350 or ac["x"] > 350:
-            ac["vx"] *= -1
+    except Exception:
+        return{
+            "error": "Invalid OpenSky response"
+        }
 
-        if ac["y"] < -350 or ac["y"] > 350:
-            ac["vy"] *= -1
+    aircraft_list = []
+    states = data.get("states", [])
 
-    return aircraft
+    for aircraft in states:
+
+        if aircraft[5] is None or aircraft[6] is None or aircraft[9] is None or aircraft[10] is None:
+            continue
+        
+        aircraft_coords = (aircraft[6], aircraft[5])
+        
+        distance = geodesic((CENTER_LAT, CENTER_LON), aircraft_coords).km
+        
+        if distance > RADIUS_KM:
+            continue
+        
+        callsign = aircraft[1].strip() if aircraft[1] else "UNKNOWN"
+        fr24_cs = fr24CallsignConverter(callsign)
+        metadata = fr24_scraper.scrape_fr24(fr24_cs)
+
+        aircraft_data = {
+            "id": aircraft[0],
+            "squawk": aircraft[14],
+            "callsign": callsign,
+            "longitude": aircraft[5],
+            "latitude": aircraft[6],
+            "altitude": round(aircraft[7] * 3.28084) if aircraft[7] else None,
+            "gnd_speed": round(aircraft[9] * 1.94384),
+            "heading": aircraft[10],
+            "fr24_url": f"https://www.flightradar24.com/data/flights/{fr24_cs.lower()}",
+            "metadata": metadata,
+            "registration": metadata.get("registration"),
+            "type": metadata.get("aircraft"),
+            "origin": metadata.get("origin"),
+            "destination": metadata.get("destination"),
+            "status": metadata.get("status")
+        }
+
+        cache_db.update_aircraft(aircraft_data)
+
+        aircraft_list.append(aircraft_data)
+        
+    cache_db.cleanup()
+    return aircraft_list
