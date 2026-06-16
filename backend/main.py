@@ -55,11 +55,15 @@ cs_map = {
 }
 
 def fr24CallsignConverter(cs):
-    for prefix, replacement in cs_map.items():
-        if cs.startswith(prefix):
-            return cs.replace(prefix, replacement, 1)
-    return cs
+    if cs.startswith(tuple(cs_map.values())):
+        return cs
     
+    for prefix in sorted(cs_map.keys(), key=len, reverse=True):
+        if cs.startswith(prefix):
+            replacement = cs_map[prefix]
+            suffix = cs[len(prefix):]
+            return replacement+suffix
+    return cs
 
 @app.get("/")
 def root():
@@ -103,7 +107,24 @@ def get_aircraft():
         
         callsign = aircraft[1].strip() if aircraft[1] else "UNKNOWN"
         fr24_cs = fr24CallsignConverter(callsign)
-        metadata = fr24_scraper.scrape_fr24(fr24_cs)
+        
+        if callsign == "UNKNOWN":
+            continue
+        
+        cached_aircraft = cache_db.get_aircraft(callsign)
+        
+        if cached_aircraft:
+            metadata = {
+                "registration": cached_aircraft["registration"],
+                "aircraft": cached_aircraft["type"],
+                "origin": cached_aircraft["origin"],
+                "destination": cached_aircraft["destination"],
+                "status": cached_aircraft["status"]
+            }
+            print(f"[CACHE HIT] {callsign}")
+        else:
+            print(f"[SCRAPING] {callsign}")
+            metadata = fr24_scraper.scrape_fr24(fr24_cs)
 
         aircraft_data = {
             "id": aircraft[0],

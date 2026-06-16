@@ -2,6 +2,7 @@ import sqlite3
 import time
 
 conn = sqlite3.connect("ac.db", check_same_thread=False)
+conn.row_factory = sqlite3.Row
 def get_cursor():
     return conn.cursor()
 
@@ -80,6 +81,16 @@ def cleanup(max_age=300):
     """, (cutoff,))
     
     conn.commit()
+    
+def get_aircraft(callsign):
+    cursor = get_cursor()
+    
+    cursor.execute("""
+        SELECT * FROM aircraft
+        WHERE callsign = ?
+    """, (callsign, ))
+    
+    return cursor.fetchone()
 
 init_db()
 
