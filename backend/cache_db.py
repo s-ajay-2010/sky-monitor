@@ -22,7 +22,6 @@ def init_db():
             origin TEXT,
             destination TEXT,
             status TEXT,
-            fr24_url TEXT,
             last_seen INTEGER
 
         )
@@ -46,10 +45,9 @@ def update_aircraft(aircraft):
             origin,
             destination,
             status,
-            fr24_url,
             last_seen
         )
-        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         aircraft["id"],
         aircraft["callsign"],
@@ -63,7 +61,6 @@ def update_aircraft(aircraft):
         aircraft.get("origin"),
         aircraft.get("destination"),
         aircraft.get("status"),
-        aircraft["fr24_url"],
         int(time.time())
     )
     )
@@ -82,14 +79,9 @@ def cleanup(max_age=300):
     
     conn.commit()
     
-def get_aircraft(callsign):
+def get_aircraft(icao24):
     cursor = get_cursor()
-    
-    cursor.execute("""
-        SELECT * FROM aircraft
-        WHERE callsign = ?
-    """, (callsign, ))
-    
+    cursor.execute("""SELECT * FROM aircraft WHERE icao24 = ?""", (icao24, ))
     return cursor.fetchone()
 
 init_db()

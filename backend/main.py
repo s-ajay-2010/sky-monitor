@@ -4,13 +4,11 @@ from fastapi.middleware.cors import CORSMiddleware
 import os
 from dotenv import load_dotenv
 import cache_db
-import fr24_scraper
-from geopy.distance import geodesic
 
 load_dotenv()
-CENTER_LAT = float(os.getenv("CENTER_LAT"))
-CENTER_LON = float(os.getenv("CENTER_LON"))
-RADIUS_KM = float(os.getenv("RADIUS_KM"))
+lat = float(os.getenv("CENTER_LAT"))
+lon = float(os.getenv("CENTER_LON"))
+radius = float(os.getenv("RADIUS_KM"))
 
 app = FastAPI()
 
@@ -22,48 +20,22 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-cs_map = {
-    "IGO": "6E",
-    "AIC": "AI",
-    "IX": "AXB",
-    "QP": "AKJ",
-    "SG": "SEJ",
-    "9I": "LLR",
-    "S5": "SDG",
-    "EK": "UAE",
-    "EY": "ETD",
-    "QR": "QTR",
-    "G9": "ABY",
-    "WY": "OMA",
-    "OV": "OMS",
-    "J9": "JZR",
-    "KU": "KAC",
-    "SQ": "SIA",
-    "TR": "TGW",
-    "MH": "MAS",
-    "AK": "AXM",
-    "TG": "THA",
-    "FD": "AIQ",
-    "CX": "CPA",
-    "UL": "ALK",
-    "8D": "EXV",
-    "BG": "BBC",
-    "LH": "DLH",
-    "BA": "BAW",
-    "ET": "ETH",
-    "VTI": "UK",
-}
-
-def fr24CallsignConverter(cs):
-    if cs.startswith(tuple(cs_map.values())):
-        return cs
+def adsbdb(icao24, callsign):
+    cached = cache_db.get_aircraft(icao24)
+    if cached and cached["origin"] and cached["origin"] != "Unknown":
+        return cached["origin"], cached["destination"]
+    try:
+        r = requests.get(f"https://api.adsbdb.com/v0/callsign/{callsign}", timeout=5)
+        if r.status_code == 200:
+            route = r.json().get("response", {}).get("flightroute", {})
+            return(
+                route.get("origin", {}).get("iata_code", "Unknown"),
+                route.get("destination", {}).get("iata_code", "Unknown")
+            )
+    except:
+        pass
+    return "Unknown", "Unknown"
     
-    for prefix in sorted(cs_map.keys(), key=len, reverse=True):
-        if cs.startswith(prefix):
-            replacement = cs_map[prefix]
-            suffix = cs[len(prefix):]
-            return replacement+suffix
-    return cs
 
 @app.get("/")
 def root():
@@ -75,11 +47,11 @@ def root():
 @app.get("/aircraft")
 def get_aircraft():
 
-    url="https://opensky-network.org/api/states/all"
+    url=f"https://api.airplanes.live/v2/point/{lat}/{lon}/{radius}"
     response = requests.get(url, timeout=10)
     if response.status_code != 200:
         return{
-            "error": "OpenSky API unavailable"
+            "error": "API unavailable"
         }
     
     try:
@@ -87,61 +59,35 @@ def get_aircraft():
 
     except Exception:
         return{
-            "error": "Invalid OpenSky response"
+            "error": "Invalid response"
         }
 
     aircraft_list = []
-    states = data.get("states", [])
+    ac = data.get("ac", [])
 
-    for aircraft in states:
-
-        if aircraft[5] is None or aircraft[6] is None or aircraft[9] is None or aircraft[10] is None:
+    for aircraft in ac:
+        
+        callsign = aircraft.get("flight", "").strip()
+        
+        if not callsign:
             continue
         
-        aircraft_coords = (aircraft[6], aircraft[5])
+        icao24 = aircraft.get("hex", "").strip().strip("'")
+        origin, destination = adsbdb(icao24, callsign)
         
-        distance = geodesic((CENTER_LAT, CENTER_LON), aircraft_coords).km
-        
-        if distance > RADIUS_KM:
-            continue
-        
-        callsign = aircraft[1].strip() if aircraft[1] else "UNKNOWN"
-        fr24_cs = fr24CallsignConverter(callsign)
-        
-        if callsign == "UNKNOWN":
-            continue
-        
-        cached_aircraft = cache_db.get_aircraft(callsign)
-        
-        if cached_aircraft:
-            metadata = {
-                "registration": cached_aircraft["registration"],
-                "aircraft": cached_aircraft["type"],
-                "origin": cached_aircraft["origin"],
-                "destination": cached_aircraft["destination"],
-                "status": cached_aircraft["status"]
-            }
-            print(f"[CACHE HIT] {callsign}")
-        else:
-            print(f"[SCRAPING] {callsign}")
-            metadata = fr24_scraper.scrape_fr24(fr24_cs)
-
         aircraft_data = {
-            "id": aircraft[0],
-            "squawk": aircraft[14],
+            "id": icao24,
+            "squawk": aircraft.get("squawk"),
             "callsign": callsign,
-            "longitude": aircraft[5],
-            "latitude": aircraft[6],
-            "altitude": round(aircraft[7] * 3.28084) if aircraft[7] else None,
-            "gnd_speed": round(aircraft[9] * 1.94384),
-            "heading": aircraft[10],
-            "fr24_url": f"https://www.flightradar24.com/data/flights/{fr24_cs.lower()}",
-            "metadata": metadata,
-            "registration": metadata.get("registration"),
-            "type": metadata.get("aircraft"),
-            "origin": metadata.get("origin"),
-            "destination": metadata.get("destination"),
-            "status": metadata.get("status")
+            "longitude": aircraft.get("lon"),
+            "latitude": aircraft.get("lat"),
+            "altitude": aircraft.get("alt_baro"),
+            "gnd_speed": aircraft.get("gs"),
+            "heading": aircraft.get("track"),
+            "registration": aircraft.get("registration"),
+            "type": aircraft.get("t"),
+            "origin": origin,
+            "destination": destination,
         }
 
         cache_db.update_aircraft(aircraft_data)
