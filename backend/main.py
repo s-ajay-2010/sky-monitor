@@ -22,8 +22,11 @@ app.add_middleware(
 
 def adsbdb(icao24, callsign):
     cached = cache_db.get_aircraft(icao24)
-    if cached and cached["origin"] and cached["origin"] != "Unknown":
-        return cached["origin"], cached["destination"]
+    if cached:
+        origin = cached[9]
+        destination = cached[10]
+        if origin and origin !="Unknown":
+            return origin, destination
     try:
         r = requests.get(f"https://api.adsbdb.com/v0/callsign/{callsign}", timeout=5)
         if r.status_code == 200:
