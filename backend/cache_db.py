@@ -8,7 +8,6 @@ load_dotenv(override=True)
 
 conn = libsql.connect(database=os.environ["TURSO_DATABASE_URL"], auth_token=os.environ["TURSO_AUTH_TOKEN"])
 
-conn.row_factory = libsql.Row
 db_lock = threading.Lock()
 def get_cursor():
     return conn.cursor()
