@@ -2,7 +2,7 @@ import sqlite3
 import time
 import threading
 
-conn = sqlite3.connect("ac.db", check_same_thread=False)
+conn = sqlite3.connect("aircrafts.db", check_same_thread=False)
 conn.row_factory = sqlite3.Row
 db_lock = threading.Lock()
 def get_cursor():
