@@ -41,9 +41,13 @@ export default function AircraftCard({selectedAircraft}) {
         </div>
 
         <div style={{marginBottom: "14px"}}>AIRCRAFT: {selectedAircraft?.type || "---"}</div>
-        <div style={{marginBottom: "14px"}}>ALTITUDE: {selectedAircraft?.altitude || "---"}</div>
-        <div style={{marginBottom: "14px"}}>AIR-SPEED: {selectedAircraft?.speed || "---"}</div>
-        <div style={{marginBottom: "14px"}}>HEADING: {selectedAircraft?.heading || "---"}</div>
+        <div style={{marginBottom: "14px"}}>CALLSIGN: {selectedAircraft?.callsign || "---"}</div>
+        <div style={{marginBottom: "14px"}}>ALTITUDE: {selectedAircraft?.altitude || "---"}ft</div>
+        <div style={{marginBottom: "14px"}}>AIR-SPEED: {selectedAircraft?.gnd_speed || "---"}kts</div>
+        <div style={{marginBottom: "14px"}}>HEADING: {selectedAircraft?.heading || "---"}°</div>
+        <div style={{marginBottom: "14px"}}>SQUAWK: {selectedAircraft?.squawk || "---"}</div>
+        <div style={{marginBottom: "14px"}}>FROM: {selectedAircraft?.origin || "---"}</div>
+        <div style={{marginBottom: "14px"}}>DESTINATION: {selectedAircraft?.destination || "---"}</div>
         <div style={{marginBottom: "14px"}}>STATUS: {selectedAircraft ? "TRACKING" : "NOTHING TO TRACK"}</div>
       </div>
     )

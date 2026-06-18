@@ -1,8 +1,10 @@
 import sqlite3
 import time
+import threading
 
 conn = sqlite3.connect("ac.db", check_same_thread=False)
 conn.row_factory = sqlite3.Row
+db_lock = threading.Lock()
 def get_cursor():
     return conn.cursor()
 
@@ -30,59 +32,60 @@ def init_db():
     conn.commit()
 
 def update_aircraft(aircraft):
-    cursor = get_cursor()
-    cursor.execute("""
-        INSERT OR REPLACE INTO aircraft(
-            icao24,
-            callsign,
-            latitude,
-            longitude,
-            altitude,
-            gnd_speed,
-            heading,
-            registration,
-            type,
-            origin,
-            destination,
-            status,
-            last_seen
+    with db_lock:
+        cursor = get_cursor()
+        cursor.execute("""
+            INSERT OR REPLACE INTO aircraft(
+                icao24,
+                callsign,
+                latitude,
+                longitude,
+                altitude,
+                gnd_speed,
+                heading,
+                registration,
+                type,
+                origin,
+                destination,
+                status,
+                last_seen
+            )
+            VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            aircraft["id"],
+            aircraft["callsign"],
+            aircraft["latitude"],
+            aircraft["longitude"],
+            aircraft["altitude"],
+            aircraft["gnd_speed"],
+            aircraft["heading"],
+            aircraft["registration"],
+            aircraft["type"],
+            aircraft.get("origin"),
+            aircraft.get("destination"),
+            aircraft.get("status"),
+            int(time.time())
+            )
         )
-        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """, (
-        aircraft["id"],
-        aircraft["callsign"],
-        aircraft["latitude"],
-        aircraft["longitude"],
-        aircraft["altitude"],
-        aircraft["gnd_speed"],
-        aircraft["heading"],
-        aircraft["registration"],
-        aircraft["type"],
-        aircraft.get("origin"),
-        aircraft.get("destination"),
-        aircraft.get("status"),
-        int(time.time())
-    )
-    )
-    conn.commit()
+        conn.commit()
+    
     
 
 def cleanup(max_age=300):
-    cursor = get_cursor()
-    
-    cutoff = int(time.time()) - max_age
-    
-    cursor.execute("""
-        DELETE FROM aircraft
-        WHERE last_seen < ?
-    """, (cutoff,))
-    
-    conn.commit()
+    with db_lock:
+        cursor = get_cursor()
+        cutoff = int(time.time()) - max_age
+        cursor.execute("DELETE FROM aircraft WHERE last_seen < ?", (cutoff,))
+        conn.commit()
+
+ 
     
 def get_aircraft(icao24):
-    cursor = get_cursor()
-    cursor.execute("""SELECT * FROM aircraft WHERE icao24 = ?""", (icao24, ))
-    return cursor.fetchone()
+    with db_lock:
+        cursor = get_cursor()
+        cursor.execute("SELECT * FROM aircraft WHERE icao24 = ?", (icao24, ))
+        return cursor.fetchone()
 
+    
 init_db()
 

@@ -172,14 +172,14 @@ export default function RadarAnimation({aircrafts, selectedAircraft, setSelected
              width: "14px",
              height: "14px",
  
-             background: selectedAircraft?.id === aircraft.id ? "#ccffcc" : `${aircraft.color}`,
+             background: selectedAircraft?.id === aircraft.id ? "#ccffcc" : "#01850a",
  
              borderRadius: "50%",
  
              left: `calc(50% + ${aircraft.x}px)`,
              top: `calc( 50% - ${aircraft.y}px)`,
  
-             boxShadow: selectedAircraft?.id === aircraft.id ? "0 0 30px #ccffcc" : `0 0 20px ${aircraft.color}`,
+             boxShadow: selectedAircraft?.id === aircraft.id ? "0 0 30px #ccffcc" : "0 0 20px #00762f",
  
              cursor: "pointer",
              

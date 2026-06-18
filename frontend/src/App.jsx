@@ -5,6 +5,9 @@ import StatusPanel from "./components/StatusPanel.jsx"
 import RadarAnimation from "./components/RadarAnimation.jsx"
 
 const API = import.meta.env.VITE_API_URL
+const CENTER_LAT = parseFloat(import.meta.env.VITE_CENTER_LAT);
+const CENTER_LON = parseFloat(import.meta.env.VITE_CENTER_LON);
+const SCALE = 0.8;
 
 export default function App() {
 
@@ -21,6 +24,7 @@ export default function App() {
         const response = await fetch(`${API}aircraft`);
 
         const data = await response.json();
+        console.log(data)
 
         setAircrafts((prevAircrafts) => {
           return data.map((newAircraft) => {
@@ -28,9 +32,9 @@ export default function App() {
             
             return {
               ...newAircraft,
-              
-              lastDetectionTime:
-                existingAircraft?.lastDetectionTime || 0,
+              x: (newAircraft.longitude - CENTER_LON) * SCALE * 111,
+              y: (newAircraft.latitude - CENTER_LAT) * SCALE * 111,
+              lastDetectionTime: existingAircraft?.lastDetectionTime || 0,
               };
             });
           });
@@ -41,7 +45,7 @@ export default function App() {
       };
       
       fetchAircraft();
-      const interval = setInterval(fetchAircraft, 50);
+      const interval = setInterval(fetchAircraft, 5000);
       
       return() => clearInterval(interval);
     }, []);
@@ -134,7 +138,7 @@ export default function App() {
     
 
       
-      <StatusPanel backendOnline={backendOnline} />
+      <StatusPanel backendOnline={backendOnline} aircraftCount={aircrafts.length} />
       <RadarAnimation aircrafts={aircrafts} selectedAircraft={selectedAircraft} setSelectedAircraft={setSelectedAircraft} angle={angle}/>
       <AircraftCard selectedAircraft={selectedAircraft} />
     </div>

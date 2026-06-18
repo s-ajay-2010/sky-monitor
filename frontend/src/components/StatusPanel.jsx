@@ -1,4 +1,4 @@
-export default function StatusPanel({backendOnline}) {
+export default function StatusPanel({backendOnline, aircraftCount}) {
     return(
         <div
         style={{
@@ -44,17 +44,20 @@ export default function StatusPanel({backendOnline}) {
           style={{
             opacity: 0.7,
             marginBottom: "10px",
+            color: backendOnline ? "#00ff66" : "ff3333"
           }}
         >
-          SIGNAL: STRONG
+          SIGNAL: {backendOnline ? "STRONG" : "IDK VRO BACKEND QUIT:("}
         </div>
 
         <div
           style={{
             opacity: 0.7,
+            marginBottom: "10px",
+            color: backendOnline ? "00ff66" : "ff3333"
           }}
         >
-          TRACKING ACTIVE
+          TRACKING: {backendOnline ? aircraftCount : "0"}
         </div>
       </div>
     )
