@@ -1,4 +1,4 @@
-import libsql
+import libsql # pyright: ignore[reportMissingImports]
 import os
 from dotenv import load_dotenv
 import time
@@ -6,7 +6,7 @@ import threading
 
 load_dotenv(override=True)
 
-conn = libsql.connect(database=os.environ["TURSO_DATABASE_URL"], auth_token=os.environ["TURSO_AUTH_TOKEN"], check_same_thread=False)
+conn = libsql.connect(database=os.environ["TURSO_DATABASE_URL"], auth_token=os.environ["TURSO_AUTH_TOKEN"])
 
 conn.row_factory = libsql.Row
 db_lock = threading.Lock()
