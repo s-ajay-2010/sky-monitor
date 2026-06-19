@@ -3,13 +3,14 @@ import React from "react";
 import AircraftCard from "./components/AircraftCard.jsx"
 import StatusPanel from "./components/StatusPanel.jsx"
 import RadarAnimation from "./components/RadarAnimation.jsx"
+import CoordInput from "./components/CoordInput.jsx"
 
 const API = import.meta.env.VITE_API_URL
-const CENTER_LAT = parseFloat(import.meta.env.VITE_CENTER_LAT);
-const CENTER_LON = parseFloat(import.meta.env.VITE_CENTER_LON);
 const SCALE = 0.8;
 
 export default function App() {
+  const [CENTER_LAT, setCenterLat] = useState(parseFloat(import.meta.env.VITE_CENTER_LAT));
+  const [CENTER_LON, setCenterLon] = useState(parseFloat(import.meta.env.VITE_CENTER_LON));
 
   const [angle, setAngle] = useState(0);
 
@@ -48,7 +49,7 @@ export default function App() {
       const interval = setInterval(fetchAircraft, 5000);
       
       return() => clearInterval(interval);
-    }, []);
+    }, [CENTER_LAT, CENTER_LON]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -137,8 +138,10 @@ export default function App() {
     >{/* want to make a file for this, but wont:( */}
     
 
-      
-      <StatusPanel backendOnline={backendOnline} aircraftCount={aircrafts.length} />
+      <div style={{display: "flex", flexDirection: "column", alignSelf: "flex-start"}}>
+        <StatusPanel backendOnline={backendOnline} aircraftCount={aircrafts.length} />
+        <CoordInput onSubmit={(lat, lon) => {setCenterLat(lat); setCenterLon(lon);}} />
+      </div>
       <RadarAnimation aircrafts={aircrafts} selectedAircraft={selectedAircraft} setSelectedAircraft={setSelectedAircraft} angle={angle}/>
       <AircraftCard selectedAircraft={selectedAircraft} />
     </div>
