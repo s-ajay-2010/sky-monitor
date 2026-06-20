@@ -16,6 +16,7 @@ git clone https://github.com/s-ajay-2010/sky-monitor.git
 cd sky-monitor/backend
 cp .env.example .env #add your own variables to the designated variables:)
 python -m venv venv
+pip install requirements.txt
 python -m uvicorn main:app --reload
 cd ..
 cd sky-monitor/frontend

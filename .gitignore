@@ -1,9 +1,5 @@
 .vscode
 idk.txt
-frontend/.env
+*.env
 */__pycache__
-backend/__pycache__
-backend/__pycache__/main.cpython-314.pyc
-backend/test.py
-backend/.env
 *.db
