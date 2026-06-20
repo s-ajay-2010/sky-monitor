@@ -106,7 +106,7 @@ export default function App() {
 
     checkBackend();
 
-    const interval = setInterval(checkBackend, 5000);
+    const interval = setInterval(checkBackend, 10000);
 
     return () => clearInterval(interval);
   }, []);
