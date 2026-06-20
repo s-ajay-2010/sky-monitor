@@ -14,10 +14,12 @@ A flight tracker, which features an World_War-2 radar-like UI, built with react 
 ```bash
 git clone https://github.com/s-ajay-2010/sky-monitor.git
 cd sky-monitor/backend
+cp .env.example .env #add your own variables to the designated variables:)
 python -m venv venv
 python -m uvicorn main:app --reload
 cd ..
 cd sky-monitor/frontend
+cp .env.example .env #add your own variables to the designated variables:)
 npm run dev
 ```
 and then open [http://localhost:5173](http://localhost:5173)
@@ -26,4 +28,4 @@ and then open [http://localhost:5173](http://localhost:5173)
 ![Demo](media/demo.jpg)
 
 
-# AI Usage: Nil.
+# AI Usage: Nil
