@@ -24,3 +24,6 @@ and then open [http://localhost:5173](http://localhost:5173)
 
 ## UI
 ![Demo](media/demo.jpg)
+
+
+# AI Usage: Nil.
