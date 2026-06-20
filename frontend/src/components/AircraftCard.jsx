@@ -1,4 +1,5 @@
 export default function AircraftCard({selectedAircraft}) {
+  const isA380 = ["A380", "A388", "A38N"].includes(selectedAircraft?.type);
     return(
         <div
         style={{
@@ -9,7 +10,12 @@ export default function AircraftCard({selectedAircraft}) {
           border: "1px solid rgba(0, 255, 0, 0.15)",
           borderRadius: "12px",
 
-          background: "rgba(0, 20, 0, 0.45)",
+          backgroundColor: isA380 ? "rgba(0, 20, 0, 0.75)" : "rgba(0, 0, 0, 0.45)",
+          backgroundImage: isA380 ? "url('/src/assets/a380.jpg')" : "none",
+          backgroundSize: "cover",
+          backgroundBlendMode: "overlay",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
 
           padding: "18px",
 
