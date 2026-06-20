@@ -1,26 +1,26 @@
-# SKY-MONITOR
+# SKY-MONITOR(Vercel Branch)
 
 A flight tracker, which features an World_War-2 radar-like UI, built with react for frontend and fastAPI(i like it).
 
 ## Features
 - Track aircrafts near you.
-- Location is not collected directly, so you get privacy.(although user coords sandboxing is not implemented, so you may need to enter coords everytime it refreshes:(
+- Location is not collected directly, so you get privacy.[although user coords sandboxing is not implemented, so you may need to enter coords everytime it refreshes:( ]
 
 ## Stack
 - React (vite) for frontend.
 - Python(FastAPI) for backend.
 
 ## Setup
-```bash
-git clone https://github.com/s-ajay-2010/sky-monitor.git
-cd sky-monitor/backend
-python -m venv venv
-python -m uvicorn main:app --reload
-cd ..
-cd sky-monitor/frontend
-npm run dev
-```
-and then open [http://localhost:5173](http://localhost:5173)
+- Fork this repo, connect to vercel.
+- Set root repo as frontend for one deployment and backend for another one.
+- Check .env.example for environment variable details as frontend and backend use seperate ones.
+- Turn off deployment protection if you're going to use a deifferent domain on top of vercel or if you get hit with CORS policy issues.
+
+P.S: This set-up msg doesn't contain about how to set-up tursodb, for that please check official documentations.
 
 ## UI
 ![Demo](media/demo.png)
+
+
+
+## AI Usage: Nil
