@@ -21,6 +21,7 @@ python -m uvicorn main:app --reload
 cd ..
 cd sky-monitor/frontend
 cp .env.example .env #add your own variables to the designated variables:)
+npm install
 npm run dev
 ```
 and then open [http://localhost:5173](http://localhost:5173)
