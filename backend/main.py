@@ -45,9 +45,13 @@ def root():
 
 
 @app.get("/aircraft")
-def get_aircraft():
+def get_aircraft(lat: float = None, lon: float = None, r: float = None):
 
-    url=f"https://api.airplanes.live/v2/point/{lat}/{lon}/{radius}"
+    center_lat = lat or float(os.getenv("CENTER_LAT"))
+    center_lon = lon or float(os.getenv("CENTER_LON"))
+    center_r = r or float(os.getenv("RADIUS_KM"))
+
+    url=f"https://api.airplanes.live/v2/point/{center_lat}/{center_lon}/{center_r}"
     response = requests.get(url, timeout=10)
     if response.status_code != 200:
         return{

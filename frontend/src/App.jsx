@@ -22,7 +22,7 @@ export default function App() {
   useEffect(() => {
     const fetchAircraft = async () => {
       try {
-        const response = await fetch(`${API}aircraft`);
+        const response = await fetch(`${API}aircraft?lat=${centerLat}&lon=${centerLon}&r=${radius}`);
 
         const data = await response.json();
         console.log(data)
