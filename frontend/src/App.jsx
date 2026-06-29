@@ -7,6 +7,7 @@ import CoordInput from "./components/CoordInput.jsx"
 
 const API = import.meta.env.VITE_API_URL
 const SCALE = 0.8;
+const RADIUS = import.meta.env.VITE_RADIUS_KM
 
 export default function App() {
   const [CENTER_LAT, setCenterLat] = useState(parseFloat(import.meta.env.VITE_CENTER_LAT));
@@ -22,7 +23,7 @@ export default function App() {
   useEffect(() => {
     const fetchAircraft = async () => {
       try {
-        const response = await fetch(`${API}aircraft`);
+        const response = await fetch(`${API}aircraft?lat=${CENTER_LAT}&lon=${CENTER_LAN}&r=${RADIUS}`);
 
         const data = await response.json();
         console.log(data)
