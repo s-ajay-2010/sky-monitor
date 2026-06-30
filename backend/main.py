@@ -6,9 +6,11 @@ from dotenv import load_dotenv
 import cache_db
 
 load_dotenv()
-lat = float(os.getenv("CENTER_LAT"))
-lon = float(os.getenv("CENTER_LON"))
-radius = float(os.getenv("RADIUS_KM"))
+
+CENTER_LAT = 13.09
+CENTER_LON = 80.11
+RADIUS_KM = 250
+
 
 app = FastAPI()
 
@@ -22,8 +24,11 @@ app.add_middleware(
 
 def adsbdb(icao24, callsign):
     cached = cache_db.get_aircraft(icao24)
-    if cached and cached["origin"] and cached["origin"] != "Unknown":
-        return cached["origin"], cached["destination"]
+    if cached:
+        origin = cached[9]
+        destination = cached[10]
+        if origin and origin !="Unknown":
+            return origin, destination
     try:
         r = requests.get(f"https://api.adsbdb.com/v0/callsign/{callsign}", timeout=5)
         if r.status_code == 200:
@@ -47,9 +52,9 @@ def root():
 @app.get("/aircraft")
 def get_aircraft(lat: float = None, lon: float = None, r: float = None):
 
-    center_lat = lat or float(os.getenv("CENTER_LAT"))
-    center_lon = lon or float(os.getenv("CENTER_LON"))
-    center_r = r or float(os.getenv("RADIUS_KM"))
+    center_lat = lat or float(CENTER_LAT)
+    center_lon = lon or float(CENTER_LON)
+    center_r = r or float(RADIUS_KM)
 
     url=f"https://api.airplanes.live/v2/point/{center_lat}/{center_lon}/{center_r}"
     response = requests.get(url, timeout=10)

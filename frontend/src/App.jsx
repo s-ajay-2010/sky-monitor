@@ -3,26 +3,41 @@ import React from "react";
 import AircraftCard from "./components/AircraftCard.jsx"
 import StatusPanel from "./components/StatusPanel.jsx"
 import RadarAnimation from "./components/RadarAnimation.jsx"
-import CoordInput from "./components/CoordInput.jsx"
 
 const API = import.meta.env.VITE_API_URL
 const SCALE = 0.8;
-
+const RADIUS = 250
 export default function App() {
-  const [CENTER_LAT, setCenterLat] = useState(parseFloat(import.meta.env.VITE_CENTER_LAT));
-  const [CENTER_LON, setCenterLon] = useState(parseFloat(import.meta.env.VITE_CENTER_LON));
+  const [CENTER_LAT, setCenterLat] = useState(parseFloat(13.09));
+  const [CENTER_LON, setCenterLon] = useState(parseFloat(80.11));
 
   const [angle, setAngle] = useState(0);
 
   const [aircrafts, setAircrafts] = useState([]);
 
+  const [countdown, setCountdown] = useState(300);
+
+  useEffect(() => {
+  const countInterval = setInterval(() => {
+    setCountdown((p) => p <= 1 ? 300 : p - 1);
+  }, 3000);
+  return () => clearInterval(countInterval);
+  }, []);
+
   const[selectedAircraft, setSelectedAircraft] = useState(null);
   const[backendOnline, setBackendOnline] = useState(false);
 
   useEffect(() => {
+    navigator.geolocation.getCurrentPosition((pos) => {
+      setCenterLat(pos.coords.latitude);
+      setCenterLon(pos.coords.longitude);
+    }, () => {});
+  }, []);
+
+  useEffect(() => {
     const fetchAircraft = async () => {
       try {
-        const response = await fetch(`${API}aircraft?lat=${centerLat}&lon=${centerLon}&r=${radius}`);
+        const response = await fetch(`${API}aircraft?lat=${CENTER_LAT}&lon=${CENTER_LON}&r=${RADIUS}`);
 
         const data = await response.json();
         console.log(data)
@@ -39,6 +54,7 @@ export default function App() {
               };
             });
           });
+          setCountdown(300);
         }
         catch(error){
           console.error("Aircraft fetch failed:", error);
@@ -139,8 +155,7 @@ export default function App() {
     
 
       <div style={{display: "flex", flexDirection: "column", alignSelf: "flex-start"}}>
-        <StatusPanel backendOnline={backendOnline} aircraftCount={aircrafts.length} />
-        <CoordInput onSubmit={(lat, lon) => {setCenterLat(lat); setCenterLon(lon);}} />
+        <StatusPanel backendOnline={backendOnline} aircraftCount={aircrafts.length} countdown={countdown}/>
       </div>
       <RadarAnimation aircrafts={aircrafts} selectedAircraft={selectedAircraft} setSelectedAircraft={setSelectedAircraft} angle={angle}/>
       <AircraftCard selectedAircraft={selectedAircraft} />
