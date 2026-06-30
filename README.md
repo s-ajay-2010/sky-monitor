@@ -4,7 +4,7 @@ A flight tracker, which features an World_War-2 radar-like UI, built with react 
 
 ## Features
 - Track aircrafts near you.
-- Location is not collected directly, so you get privacy.(although user coords sandboxing is not implemented, so you may need to enter coords everytime it refreshes:(
+- Location is collected directly, but its never stored and stays in the client side only.
 
 ## Stack
 - React (vite) for frontend.
