@@ -57,7 +57,7 @@ export default function StatusPanel({backendOnline, aircraftCount}) {
             color: backendOnline ? "00ff66" : "ff3333"
           }}
         >
-          TRACKING: {backendOnline ? aircraftCount>0 ? aircraftCount : "fetching" : "0"}
+          TRACKING: {backendOnline ? aircraftCount>0 ? aircraftCount : "Fetching..." : "0"}
         </div>
       </div>
     )
