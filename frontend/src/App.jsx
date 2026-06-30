@@ -3,7 +3,6 @@ import React from "react";
 import AircraftCard from "./components/AircraftCard.jsx"
 import StatusPanel from "./components/StatusPanel.jsx"
 import RadarAnimation from "./components/RadarAnimation.jsx"
-import CoordInput from "./components/CoordInput.jsx"
 
 const API = import.meta.env.VITE_API_URL
 const SCALE = 0.8;
@@ -147,7 +146,6 @@ export default function App() {
 
       <div style={{display: "flex", flexDirection: "column", alignSelf: "flex-start"}}>
         <StatusPanel backendOnline={backendOnline} aircraftCount={aircrafts.length} />
-        <CoordInput onSubmit={(lat, lon) => {setCenterLat(lat); setCenterLon(lon);}} />
       </div>
       <RadarAnimation aircrafts={aircrafts} selectedAircraft={selectedAircraft} setSelectedAircraft={setSelectedAircraft} angle={angle}/>
       <AircraftCard selectedAircraft={selectedAircraft} />
