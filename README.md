@@ -27,7 +27,8 @@ npm run dev
 and then open [http://localhost:5173](http://localhost:5173)
 
 ## UI
-![Demo](media/demo.jpg)
+![Demo-1](media/demo-1.jpg)
+![Demo-1](media/demo-2.jpg)
 
 
 # AI Usage: Nil
