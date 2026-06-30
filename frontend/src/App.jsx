@@ -62,9 +62,7 @@ export default function App() {
   const[backendOnline, setBackendOnline] = useState(false);
 
   useEffect(() => {
-    if (CENTER_LAT === null || CENTER_LON === null){
-      return;
-    }
+    if (CENTER_LAT === null || CENTER_LON === null){return;}
 
     const fetchAircraft = async () => {
       try {
@@ -146,7 +144,7 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (CENTER_LAT === null || CENTER_LON === null) return;
+    if (CENTER_LAT === null || CENTER_LON === null){return;}
     const checkBackend = async () => {
       try {
         const response = await fetch(API);
