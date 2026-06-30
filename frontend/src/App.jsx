@@ -144,8 +144,6 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (CENTER_LAT === null || CENTER_LON === null){return;}
-    
     const checkBackend = async () => {
       try {
         const response = await fetch(API);
