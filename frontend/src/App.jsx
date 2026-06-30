@@ -7,11 +7,10 @@ import CoordInput from "./components/CoordInput.jsx"
 
 const API = import.meta.env.VITE_API_URL
 const SCALE = 0.8;
-const RADIUS = import.meta.env.VITE_RADIUS_KM
-
+const RADIUS = 250
 export default function App() {
-  const [CENTER_LAT, setCenterLat] = useState(parseFloat(import.meta.env.VITE_CENTER_LAT));
-  const [CENTER_LON, setCenterLon] = useState(parseFloat(import.meta.env.VITE_CENTER_LON));
+  const [CENTER_LAT, setCenterLat] = useState(parseFloat(13.09));
+  const [CENTER_LON, setCenterLon] = useState(parseFloat(80.11));
 
   const [angle, setAngle] = useState(0);
 
@@ -19,6 +18,13 @@ export default function App() {
 
   const[selectedAircraft, setSelectedAircraft] = useState(null);
   const[backendOnline, setBackendOnline] = useState(false);
+
+  useEffect(() => {
+    navigator.geolocation.getCurrentPosition((pos) => {
+      setCenterLat(pos.coords.latitude);
+      setCenterLon(pos.coords.longitude);
+    }, () => {});
+  }, []);
 
   useEffect(() => {
     const fetchAircraft = async () => {
