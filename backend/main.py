@@ -7,9 +7,6 @@ import cache_db
 
 load_dotenv()
 
-CENTER_LAT = 13.09
-CENTER_LON = 80.11
-RADIUS_KM = 250
 
 
 app = FastAPI()
@@ -50,11 +47,14 @@ def root():
 
 
 @app.get("/aircraft")
-def get_aircraft(lat: float = None, lon: float = None, r: float = None):
+def get_aircraft(lat: float = None, lon: float = None, r: float = 250):
 
-    center_lat = lat or float(CENTER_LAT)
-    center_lon = lon or float(CENTER_LON)
-    center_r = r or float(RADIUS_KM)
+    center_lat = lat
+    center_lon = lon 
+    center_r = r
+
+    if lat is None or lon is None:
+        return {"error": "Latitude and longitude required"}
 
     url=f"https://api.airplanes.live/v2/point/{center_lat}/{center_lon}/{center_r}"
     response = requests.get(url, timeout=10)

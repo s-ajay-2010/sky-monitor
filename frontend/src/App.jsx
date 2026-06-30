@@ -3,15 +3,49 @@ import React from "react";
 import AircraftCard from "./components/AircraftCard.jsx"
 import StatusPanel from "./components/StatusPanel.jsx"
 import RadarAnimation from "./components/RadarAnimation.jsx"
+import Toast from "./components/Toast";
+import "./App.css";
+import LocationPrompt from "./components/LocationPrompt";
 
 const API = import.meta.env.VITE_API_URL
 const SCALE = 0.8;
-const RADIUS = 250
+const RADIUS = 250;
+
 export default function App() {
-  const [CENTER_LAT, setCenterLat] = useState(parseFloat(13.09));
-  const [CENTER_LON, setCenterLon] = useState(parseFloat(80.11));
+  const [CENTER_LAT, setCenterLat] = useState(null);
+  const [CENTER_LON, setCenterLon] = useState(null);
 
   const [angle, setAngle] = useState(0);
+
+  const [toast, setToast] = useState(null);
+  const showToast = (message, type = "success") => {
+    setToast({ message, type });
+
+    setTimeout(() => {
+        setToast(null);
+    }, 5000);
+  };
+  
+  const [locationFailed, setLocationfailed] = useState(false);
+  const [showPrompt,setShowPrompt]=useState(true);
+  async function requestLocation() {
+    navigator.geolocation.getCurrentPosition((pos) => {
+      setCenterLat(pos.coords.latitude);
+      setCenterLon(pos.coords.longitude);
+
+      setShowPrompt(false);
+      showToast("Location acquired.");
+      setLocationfailed(false);
+    },
+    () => {
+      showToast("Location permission denied.", "error");
+      setLocationfailed(true);
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 10000,
+    });
+  }
 
   const [aircrafts, setAircrafts] = useState([]);
 
@@ -20,7 +54,7 @@ export default function App() {
   useEffect(() => {
   const countInterval = setInterval(() => {
     setCountdown((p) => p <= 1 ? 300 : p - 1);
-  }, 3000);
+  }, 1000);
   return () => clearInterval(countInterval);
   }, []);
 
@@ -28,18 +62,20 @@ export default function App() {
   const[backendOnline, setBackendOnline] = useState(false);
 
   useEffect(() => {
-    navigator.geolocation.getCurrentPosition((pos) => {
-      setCenterLat(pos.coords.latitude);
-      setCenterLon(pos.coords.longitude);
-    }, () => {});
-  }, []);
+    if (CENTER_LAT === null || CENTER_LON === null){
+      return;
+    }
 
-  useEffect(() => {
     const fetchAircraft = async () => {
       try {
         const response = await fetch(`${API}aircraft?lat=${CENTER_LAT}&lon=${CENTER_LON}&r=${RADIUS}`);
-
+        if (!response.ok){
+          throw new Error(`HTTP ${response.status}`);
+        }
         const data = await response.json();
+        if(!Array.isArray(data)) {
+          throw new Error("Backend returned invalid aircraft list");
+        }
         console.log(data)
 
         setAircrafts((prevAircrafts) => {
@@ -58,11 +94,12 @@ export default function App() {
         }
         catch(error){
           console.error("Aircraft fetch failed:", error);
+          showToast("Couldn't fetch aircraft.", "error");
         }
       };
       
       fetchAircraft();
-      const interval = setInterval(fetchAircraft, 5000);
+      const interval = setInterval(fetchAircraft, 30000);
       
       return() => clearInterval(interval);
     }, [CENTER_LAT, CENTER_LON]);
@@ -109,6 +146,7 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    if (CENTER_LAT === null || CENTER_LON === null) return;
     const checkBackend = async () => {
       try {
         const response = await fetch(API);
@@ -122,7 +160,7 @@ export default function App() {
 
     checkBackend();
 
-    const interval = setInterval(checkBackend, 10000);
+    const interval = setInterval(checkBackend, 300000);
 
     return () => clearInterval(interval);
   }, []);
@@ -153,12 +191,14 @@ export default function App() {
       }}
     >{/* want to make a file for this, but wont:( */}
     
-
+      {showPrompt && (<LocationPrompt onAllow={requestLocation} lf={locationFailed}/>)}
+      
       <div style={{display: "flex", flexDirection: "column", alignSelf: "flex-start"}}>
         <StatusPanel backendOnline={backendOnline} aircraftCount={aircrafts.length} countdown={countdown}/>
       </div>
       <RadarAnimation aircrafts={aircrafts} selectedAircraft={selectedAircraft} setSelectedAircraft={setSelectedAircraft} angle={angle}/>
       <AircraftCard selectedAircraft={selectedAircraft} />
+      <Toast message={toast?.message} type={toast?.type}/>
     </div>
   );
 }
