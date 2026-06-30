@@ -1,4 +1,4 @@
-export default function StatusPanel({backendOnline, aircraftCount}) {
+export default function StatusPanel({backendOnline, aircraftCount, countdown}) {
     return(
         <div
         style={{
@@ -58,6 +58,9 @@ export default function StatusPanel({backendOnline, aircraftCount}) {
           }}
         >
           TRACKING: {backendOnline ? aircraftCount>0 ? aircraftCount : "Fetching..." : "0"}
+        </div>
+        <div style={{ opacity: 0.7, marginBottom: "10px" }}>
+          WAIT TIME TO GET AIRCRAFTS: {aircraftCount>0 ? "Sorry for the delay:)" : `${countdown} secs[300secs = 5mins]}`}
         </div>
       </div>
     )

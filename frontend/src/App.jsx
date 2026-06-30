@@ -15,6 +15,15 @@ export default function App() {
 
   const [aircrafts, setAircrafts] = useState([]);
 
+  const [countdown, setCountdown] = useState(300);
+
+  useEffect(() => {
+  const countInterval = setInterval(() => {
+    setCountdown((p) => p <= 1 ? 300 : p - 1);
+  }, 3000);
+  return () => clearInterval(countInterval);
+  }, []);
+
   const[selectedAircraft, setSelectedAircraft] = useState(null);
   const[backendOnline, setBackendOnline] = useState(false);
 
@@ -45,6 +54,7 @@ export default function App() {
               };
             });
           });
+          setCountdown(300);
         }
         catch(error){
           console.error("Aircraft fetch failed:", error);
@@ -145,7 +155,7 @@ export default function App() {
     
 
       <div style={{display: "flex", flexDirection: "column", alignSelf: "flex-start"}}>
-        <StatusPanel backendOnline={backendOnline} aircraftCount={aircrafts.length} />
+        <StatusPanel backendOnline={backendOnline} aircraftCount={aircrafts.length} countdown={countdown}/>
       </div>
       <RadarAnimation aircrafts={aircrafts} selectedAircraft={selectedAircraft} setSelectedAircraft={setSelectedAircraft} angle={angle}/>
       <AircraftCard selectedAircraft={selectedAircraft} />
