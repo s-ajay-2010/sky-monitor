@@ -9,6 +9,7 @@ import LocationPrompt from "./components/LocationPrompt";
 
 const API = import.meta.env.VITE_API_URL
 const SCALE = 0.8;
+const RADIUS = 100;
 
 export default function App() {
   const [CENTER_LAT, setCenterLat] = useState(null);
@@ -65,7 +66,7 @@ export default function App() {
 
     const fetchAircraft = async () => {
       try {
-        const response = await fetch(`${API}aircraft?lat=${CENTER_LAT}&lon=${CENTER_LON}`);
+        const response = await fetch(`${API}aircraft?lat=${CENTER_LAT}&lon=${CENTER_LON}&r=${RADIUS}`);
         if (!response.ok){
           throw new Error(`HTTP ${response.status}`);
         }
