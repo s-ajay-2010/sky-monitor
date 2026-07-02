@@ -47,7 +47,7 @@ def root():
 
 
 @app.get("/aircraft")
-def get_aircraft(lat: float = None, lon: float = None, r: float = 250):
+def get_aircraft(lat: float = None, lon: float = None, r: float = 10):
 
     center_lat = lat
     center_lon = lon 
