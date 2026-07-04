@@ -45,11 +45,11 @@ def root():
 
 
 @app.get("/aircraft")
-def get_aircraft(lat: float = None, lon: float = None, r: float = 10):
+def get_aircraft(lat: float = None, lon: float = None, r: float = None):
 
     center_lat = lat
     center_lon = lon
-    center_r = r
+    center_r = min(r, 150)
     
     if lat is None or lon is None:
         return {"error": "Latitude and longitude required"}
