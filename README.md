@@ -33,7 +33,8 @@ and then open [http://localhost:5173](http://localhost:5173)
 
 # TO my reviewer:
 - If at all any issue arises(it should not and it won't but just in case), please feel free to send me the screenshots and details on slack @ajay .
-- And please for god's sake give full details, why?: my last reviewer's feedback before rejecting it: "It fails to fetch the radar data because the backend appears to be down or broken." just it :sob:. Like What can I do with that info? I rightaway checked the same moment it got rejected just to know that all my services worked correctly and I was not able to replicate the issue, I'm reshipping it:).
+- Use a chromium based browser(brave preferable) for testing as I've found some un-explainable(yet) let lags with the requests and I'm investigating into it, so please until then do not use a firefox or firefox based browser for testing the app.
+- And also please wait until [this](media/wait_timer.png) timer runs out to get requests as it'll measure for five seconds and by then you'll get the aircraft data.(P.S.: Console tab gives the aircraft list, if aircraft's blip doesn't come please check it too for empty lists, and it usually means no aircrafts is near you)
 
 
 # AI Usage: Nil
