@@ -9,7 +9,7 @@ import LocationPrompt from "./components/LocationPrompt";
 
 const API = import.meta.env.VITE_API_URL
 const SCALE = 0.8;
-const RADIUS = 250;
+const RADIUS = 100;
 
 export default function App() {
   const [CENTER_LAT, setCenterLat] = useState(null);
